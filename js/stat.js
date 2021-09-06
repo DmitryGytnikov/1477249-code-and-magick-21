@@ -25,7 +25,7 @@ const renderCloud = function (ctx, x, y, colorCloud, colorShadow) {
 window.renderStatistics = function (ctx, names, times) {
 
   const maxTime = Math.max(...times);
-
+  // console.log(times);
   renderCloud(
       ctx,
       Cloud.X,

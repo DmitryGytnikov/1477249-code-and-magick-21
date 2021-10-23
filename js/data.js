@@ -23,13 +23,49 @@
     wizardElement.querySelector(`.wizard-eyes`).style.fill = wizard.eyesColor;
     return wizardElement;
   };
-  const successHandler = (wizards) => {
+  const render = (wizards) => {
+    const takeNumber = wizards.length > MAX_SIMILAR_WIZARD_COUNT ? MAX_SIMILAR_WIZARD_COUNT : wizards.length;
+    similarListElement.innerHTML = ``;
     const fragment = document.createDocumentFragment();
-    for (let i = 0; i < MAX_SIMILAR_WIZARD_COUNT; i++) {
-      fragment.appendChild(renderWizard(window.data.getRandomArrElement(wizards)));
+    for (let i = 0; i < takeNumber; i++) {
+      similarListElement.appendChild(renderWizard(wizards[i]));
     }
     similarListElement.appendChild(fragment);
     userDialog.querySelector(`.setup-similar`).classList.remove(`hidden`);
+  };
+  const getRank = function (wizard) {
+    let rank = 0;
+    if (wizard.colorCoat === window.form.coatColor) {
+      rank += 2;
+    }
+    if (wizard.colorEyes === window.form.eyesColor) {
+      rank += 1;
+    }
+    return rank;
+  };
+  const namesComparator = (left, right) => {
+    if (left > right) {
+      return 1;
+    } else if (left < right) {
+      return -1;
+    } else {
+      return 0;
+    }
+  };
+  window.updateWizards = () => {
+    const sameCoatWizards = wizards.sort((left, right) => {
+      let rankDiff = getRank(right) - getRank(left);
+      if (rankDiff === 0) {
+        rankDiff = namesComparator(left.name, right.name);
+      }
+      return rankDiff;
+    });
+    render(sameCoatWizards);
+  };
+  let wizards = [];
+  const successHandler = (data) => {
+    wizards = data;
+    window.updateWizards();
   };
   const errorHandler = (errorMessage) => {
     const node = document.createElement(`div`);

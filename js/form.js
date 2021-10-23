@@ -1,6 +1,7 @@
 'use strict';
 
 (function () {
+  const DEBOUNCE_INTERVAL = 500;
   const wizard = document.querySelector(`.setup-wizard-appearance`);
   const wizardCoat = wizard.querySelector(`.wizard-coat`);
   const wizardEyes = wizard.querySelector(`.wizard-eyes`);
@@ -11,22 +12,49 @@
   const userDialog = document.querySelector(`.setup`);
   const form = userDialog.querySelector(`.setup-wizard-form`);
 
-  wizardCoat.addEventListener(`click`, () => {
-    const coatColor = window.data.getRandomArrElement(window.data.WIZARD_COAT_COLORS);
-    wizardCoatColorInput.value = coatColor;
-    wizardCoat.style.fill = coatColor;
+  const debounce = (cb) => {
+    let lastTimeout = null;
+    return (...args) => {
+      if (lastTimeout) {
+        clearTimeout(lastTimeout);
+      }
+      lastTimeout = setTimeout(() => {
+        cb(...args);
+      }, DEBOUNCE_INTERVAL);
+    };
+  };
+  const onCoatChange = debounce(() => {
+    window.updateWizards();
   });
-  wizardEyes.addEventListener(`click`, () => {
-    const eyesColor = window.data.getRandomArrElement(window.data.WIZARD_EYES_COLORS);
-    wizardEyesColorInput.value = eyesColor;
-    wizardEyes.style.fill = eyesColor;
+  const onCoatClickChange = () => {
+    const newColor = window.data.getRandomArrElement(window.data.WIZARD_COAT_COLORS);
+    wizardCoatColorInput.value = newColor;
+    wizardCoat.style.fill = newColor;
+    window.form.coatColor = newColor;
+    onCoatChange();
+  };
+  const onEyesChange = debounce(() => {
+    window.updateWizards();
   });
-  wizardFireball.addEventListener(`click`, () => {
-    const fireballColor = window.data.getRandomArrElement(window.data.WIZARD_FIREBALL_COLORS);
-    fireballInput.value = fireballColor;
-    wizardFireball.style.background = fireballColor;
-  });
-
+  const onEyesClickChange = () => {
+    const newColor = window.data.getRandomArrElement(window.data.WIZARD_EYES_COLORS);
+    wizardEyesColorInput.value = newColor;
+    wizardEyes.style.fill = newColor;
+    window.form.eyesColor = newColor;
+    onEyesChange();
+  };
+  const onFireballClickChange = () => {
+    const newColor = window.data.getRandomArrElement(window.data.WIZARD_FIREBALL_COLORS);
+    fireballInput.value = newColor;
+    wizardFireball.style.background = newColor;
+  };
+  window.form = {
+    coatColor: `rgb(101, 137, 164)`,
+    eyesColor: `black`,
+    onCoatClickChange,
+    onEyesClickChange,
+    onFireballClickChange
+  };
   const successHandler = () => {
     userDialog.classList.add(`hidden`);
   };
